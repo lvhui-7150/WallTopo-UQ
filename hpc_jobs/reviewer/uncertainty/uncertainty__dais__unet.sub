@@ -1,0 +1,45 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 1
+#JSUB -gpgpu 1
+#JSUB -J uncertainty__dais__unet
+#JSUB -W 480
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+#WALLTOPO_RESULT=../../../runs/benchmark/dais/unet/uncertainty_baselines_test.json
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/envs/aenet/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export OMP_NUM_THREADS="${NSLOTS:-1}"
+export MKL_NUM_THREADS="${NSLOTS:-1}"
+export TORCH_HOME="$HOME/.cache/torch"
+
+mkdir -p logs runs results
+python \
+  scripts/evaluate_uncertainty_baselines.py \
+  --config \
+  configs/generated/benchmark/dais/unet/seed_3407.yaml \
+  --checkpoints \
+  runs/benchmark/dais/unet/seed_3407/checkpoints/best.pt runs/benchmark/dais/unet/seed_3408/checkpoints/best.pt runs/benchmark/dais/unet/seed_3409/checkpoints/best.pt runs/benchmark/dais/unet/seed_3410/checkpoints/best.pt runs/benchmark/dais/unet/seed_3411/checkpoints/best.pt \
+  --split \
+  test \
+  --methods \
+  softmax \
+  mc_dropout \
+  ensemble \
+  --passes \
+  20 \
+  --dropout-p \
+  0.10 \
+  --device \
+  cuda \
+  --output \
+  runs/benchmark/dais/unet/uncertainty_baselines_test.json

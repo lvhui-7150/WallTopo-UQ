@@ -1,0 +1,53 @@
+seed: 42
+device: auto
+output_dir: runs/ablation_no_topology_tokens_smoke
+model_name: walltopo_uq
+num_workers: 0
+amp: true
+epochs: 2
+batch_size: 2
+image_size: 128
+channels: [16, 32, 48, 64]
+mdsm_stages: [3]
+delays: [1, 2, 4, 8]
+use_topology_tokens: false
+max_attention_tokens: 256
+num_severity_classes: 5
+
+uncertainty:
+  calibrate: true
+  tta_views: 4
+  max_calibration_samples: 32
+  target_coverage: 0.8
+  target_error: null
+
+optimizer:
+  lr: 0.0003
+  weight_decay: 0.0001
+
+scheduler:
+  name: cosine
+  min_lr: 0.00001
+
+loss:
+  seg: 1.0
+  topo: 0.25
+  geo: 0.5
+  ordinal: 0.05
+  consistency: 0.1
+  evidence: 0.1
+  cl_dice: 0.5
+  node: 0.25
+
+data:
+  train_manifest: data/synthetic/train/manifest.csv
+  val_manifest: data/synthetic/val/manifest.csv
+  test_manifest: data/synthetic/test/manifest.csv
+  image_size: 128
+  cache_derived: true
+  use_severity: true
+
+validation:
+  interval: 1
+  metric: composite
+  patience: 5

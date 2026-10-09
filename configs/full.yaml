@@ -1,0 +1,65 @@
+seed: 3407
+device: auto
+output_dir: runs/full
+num_workers: 4
+amp: true
+epochs: 100
+batch_size: 2
+grad_accum_steps: 1
+image_size: 256
+channels: [24, 48, 80, 128]
+mdsm_stages: [3]
+delays: [1, 2, 4, 8]
+topology_tokens: 4
+max_attention_tokens: 512
+num_severity_classes: 5
+severity_aux_weight: 0.0
+
+uncertainty:
+  calibrate: true
+  tta_views: 4
+  max_calibration_samples: 256
+  target_coverage: 0.8
+  target_error: 0.12
+
+optimizer:
+  lr: 0.0002
+  weight_decay: 0.0001
+
+scheduler:
+  name: cosine
+  min_lr: 0.000001
+
+loss:
+  seg: 1.0
+  topo: 0.7
+  geo: 0.7
+  ordinal: 0.2
+  consistency: 0.1
+  evidence: 0.25
+  cl_dice: 1.0
+  node: 1.0
+  width: 1.0
+  width_consistency: 0.25
+  orientation: 0.25
+  evidence_kl: 0.05
+
+data:
+  train_manifest: data/real/train/manifest.csv
+  val_manifest: data/real/val/manifest.csv
+  test_manifest: data/real/test/manifest.csv
+  image_size: 256
+  cache_derived: true
+  use_skeleton: true
+  use_endpoints: true
+  use_junctions: true
+  use_orientation: true
+  use_width: true
+  use_severity: false
+  foreground_ratio: 0.65
+  max_rotation: 10.0
+
+validation:
+  interval: 1
+  metric: composite
+  patience: 15

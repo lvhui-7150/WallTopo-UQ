@@ -1,0 +1,29 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 4
+#JSUB -gpgpu 1
+#JSUB -J walltopo_smoke
+#JSUB -W 30
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export TORCH_HOME="$HOME/.cache/torch"
+
+mkdir -p logs
+python -c "import torch; print('torch', torch.__version__); print('cuda', torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'NO GPU')"
+python scripts/run_benchmark_suite.py \
+  --profile smoke \
+  --datasets dais \
+  --models walltopo_uq \
+  --seeds 3407 \
+  --run-prefix benchmark_smoke \
+  --resume \
+  --device cuda

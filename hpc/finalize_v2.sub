@@ -1,0 +1,24 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 1
+#JSUB -gpgpu 1
+#JSUB -J walltopo_finalize_v2
+#JSUB -W 180
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/envs/aenet/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export OMP_NUM_THREADS="${NSLOTS:-1}"
+export MKL_NUM_THREADS="${NSLOTS:-1}"
+export TORCH_HOME="$HOME/.cache/torch"
+export WALLTOPO_PROPOSED="walltopo_uq_v2"
+
+mkdir -p logs results figures
+bash hpc/finalize_hpc_results.sh

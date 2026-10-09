@@ -1,0 +1,42 @@
+seed: 3407
+device: auto
+output_dir: runs/crackforest
+num_workers: 4
+amp: true
+epochs: 100
+batch_size: 2
+image_size: 256
+channels: [24, 48, 80, 128]
+mdsm_stages: [3]
+delays: [1, 2, 4, 8]
+max_attention_tokens: 512
+
+optimizer:
+  lr: 0.0002
+  weight_decay: 0.0001
+
+scheduler:
+  name: cosine
+  min_lr: 0.000001
+
+uncertainty:
+  calibrate: true
+  tta_views: 4
+  max_calibration_samples: 128
+  target_coverage: 0.8
+  target_error: 0.12
+
+data:
+  train_manifest: data/raw/crackforest/train.csv
+  val_manifest: data/raw/crackforest/val.csv
+  test_manifest: data/raw/crackforest/test.csv
+  image_size: 256
+  cache_derived: true
+  use_severity: false
+  foreground_ratio: 0.75
+  max_rotation: 10.0
+
+validation:
+  interval: 1
+  metric: composite
+  patience: 15

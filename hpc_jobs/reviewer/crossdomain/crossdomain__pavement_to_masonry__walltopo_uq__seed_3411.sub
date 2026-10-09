@@ -1,0 +1,46 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 1
+#JSUB -gpgpu 1
+#JSUB -J crossdomain__pavement_to_masonry__walltopo_uq__seed_3411
+#JSUB -W 1440
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+#WALLTOPO_RESULT=../../../runs/reviewer_crossdomain/pavement_to_masonry/walltopo_uq/seed_3411/cross_domain_summary.json
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/envs/aenet/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export OMP_NUM_THREADS="${NSLOTS:-1}"
+export MKL_NUM_THREADS="${NSLOTS:-1}"
+export TORCH_HOME="$HOME/.cache/torch"
+
+mkdir -p logs runs results
+python \
+  scripts/run_cross_domain_suite.py \
+  --scenario \
+  pavement_to_masonry \
+  --model \
+  walltopo_uq \
+  --seed \
+  3411 \
+  --epochs \
+  120 \
+  --patience \
+  25 \
+  --num-workers \
+  0 \
+  --batch-size \
+  1 \
+  --device \
+  cuda \
+  --run-prefix \
+  reviewer_crossdomain \
+  --resume

@@ -1,0 +1,46 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 1
+#JSUB -gpgpu 1
+#JSUB -J ablation__deepcrack__ablation_no_morphology__seed_3407
+#JSUB -W 720
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+#WALLTOPO_RESULT=../../../runs/reviewer_ablation/deepcrack/ablation_no_morphology/seed_3407/test_metrics.json
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/envs/aenet/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+export OMP_NUM_THREADS="${NSLOTS:-1}"
+export MKL_NUM_THREADS="${NSLOTS:-1}"
+export TORCH_HOME="$HOME/.cache/torch"
+
+mkdir -p logs runs results
+python \
+  scripts/run_benchmark_suite.py \
+  --profile \
+  full \
+  --datasets \
+  deepcrack \
+  --models \
+  ablation_no_morphology \
+  --seeds \
+  3407 \
+  --run-prefix \
+  reviewer_ablation \
+  --resume \
+  --no-collect \
+  --no-pretrained-baseline \
+  --num-workers \
+  0 \
+  --batch-size \
+  1 \
+  --device \
+  cuda

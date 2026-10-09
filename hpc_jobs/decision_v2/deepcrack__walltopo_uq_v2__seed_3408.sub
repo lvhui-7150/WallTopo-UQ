@@ -1,0 +1,33 @@
+#!/bin/bash
+#JSUB -q gpu4
+#JSUB -n 1
+#JSUB -gpgpu 1
+#JSUB -J wt_deepcrac_walltopo_uq_v2_3408
+#JSUB -W 720
+#JSUB -o logs/%J.out
+#JSUB -e logs/%J.err
+
+set -euo pipefail
+PROJECT_ROOT="${PROJECT_ROOT:-$HOME/projects/WallTopo-UQ-HPC}"
+cd "$PROJECT_ROOT"
+
+WALLTOPO_ENV_BIN="${WALLTOPO_ENV_BIN:-$HOME/miniconda3/envs/aenet/bin}"
+export PATH="$WALLTOPO_ENV_BIN:$PATH"
+unset PYTHONPATH || true
+export KMP_DUPLICATE_LIB_OK=TRUE
+export OMP_NUM_THREADS="${NSLOTS:-1}"
+export MKL_NUM_THREADS="${NSLOTS:-1}"
+export TORCH_HOME="$HOME/.cache/torch"
+
+mkdir -p logs runs results
+python scripts/run_benchmark_suite.py \
+  --profile full \
+  --datasets deepcrack \
+  --models walltopo_uq_v2 \
+  --seeds 3408 \
+  --run-prefix benchmark \
+  --resume \
+  --no-collect \
+  --no-pretrained-baseline \
+  --num-workers 0 \
+  --device cuda
